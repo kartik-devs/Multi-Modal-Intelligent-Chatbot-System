@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #2980b9;
+        }
+        .qr-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .qr-code {
+            max-width: 200px;
+            height: auto;
+        }
+        .notes-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .toc {
+            width: 25%;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+        .content {
+            width: 70%;
+        }
+        .toc ul {
+            padding-left: 20px;
+        }
+        .toc li {
+            margin-bottom: 5px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .formula {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-left: 3px solid #3498db;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        @media (max-width: 768px) {
+            .notes-container {
+                flex-direction: column;
+            }
+            .toc, .content {
+                width: 100%;
+                margin-right: 0;
+            }
+            .toc {
+                position: relative;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Machine Learning Notes</h1>
+        <p>A comprehensive collection of machine learning concepts, algorithms, and optimization techniques</p>
+    </header>
+
+    <div class="qr-container">
+        <h2>Access this repository</h2>
+        <p>Scan the QR code below to access the GitHub repository:</p>
+        <!-- Replace the src with your actual GitHub repository QR code -->
+        <div id="qrcode" class="qr-code"></div>
+        <p>Or visit: <span id="repo-url">https://github.com/yourusername/ml-notes</span></p>
+    </div>
+
+    <div class="notes-container">
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#data-representation">Data Representation</a></li>
+                <li><a href="#model-types">Model Types</a></li>
+                <li><a href="#cost-functions">Cost Functions</a></li>
+                <li><a href="#heuristic-search">Heuristic Search Algorithms</a></li>
+                <li><a href="#gradient-descent">Gradient Descent</a></li>
+                <li><a href="#advanced-optimizers">Advanced Optimizers</a></li>
+                <li><a href="#regularization">Regularization</a></li>
+                <li><a href="#model-complexity">Model Complexity</a></li>
+                <li><a href="#hyperparameter">Hyperparameter Tuning</a></li>
+                <li><a href="#feature-selection">Feature Selection</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <section id="data-representation">
+                <h2>1. Data Representation and Modeling Framework</h2>
+                <p>The foundation of machine learning models begins with understanding how data is represented:</p>
+                
+                <h3>Data Structure</h3>
+                <ul>
+                    <li>Input features: X = [X₁, X₂, ..., Xₙ] (feature vector with n features)</li>
+                    <li>Output/target variable: Y (binary for classification or real-valued for regression)</li>
+                    <li>Functional mapping: f: X → Y transforms inputs to outputs</li>
+                    <li>Probabilistic view: p(Y|X) represents conditional probability distribution</li>
+                </ul>
+            </section>
+
+            <section id="model-types">
+                <h2>2. Model Types and Functional Forms</h2>
+                
+                <h3>Binary Classification (Logistic Regression)</h3>
+                <ul>
+                    <li>Probability model: p(Y=1|X) = 1/(1+e⁻ᶻ)</li>
+                    <li>Linear predictor: Z = Σᵢ₌₀ⁿ βᵢXᵢ where X₀=1 (bias term)</li>
+                    <li>Parameters: n+1 parameters (β₀, β₁, ..., βₙ)</li>
+                    <li>Sigmoid function maps linear predictor to probability [0,1]</li>
+                </ul>
+
+                <h3>Linear Regression</h3>
+                <ul>
+                    <li>Model: p(Y|X) = β₀ + β₁X₁ + ... + βₙXₙ + N(0,σ)</li>
+                    <li>Mean function: μY|X = β₀ + β₁X₁ + ... + βₙXₙ</li>
+                    <li>Error term: N(0,σ) represents Gaussian noise</li>
+                </ul>
+            </section>
+
+            <section id="cost-functions">
+                <h2>3. Cost Functions and Maximum Likelihood Estimation</h2>
+                
+                <h3>Linear Regression Cost Function</h3>
+                <div class="formula">
+                    Mean Squared Error: C = Σᵢ₌₁ᵐ (yᵢ - f(xᵢ;β))²
+                </div>
+                <p>Optimization objective: β* = argmin C</p>
+
+                <h3>Logistic Regression Cost Function</h3>
+                <div class="formula">
+                    Log-likelihood: C = Σᵢ₌₁ᵐ [yᵢ log θₓ - (1-yᵢ) log(1-θₓ)]
+                </div>
+                <p>Optimization objective: β* = argmax C</p>
+            </section>
+
+            <section id="heuristic-search">
+                <h2>4. Heuristic Search Algorithms</h2>
+                
+                <h3>Gradient-Based Methods</h3>
+                <div class="formula">
+                    Update rule: β⁽ᵗ⁺¹⁾ = β⁽ᵗ⁾ - η∇C(β⁽ᵗ⁾)
+                </div>
+                <ul>
+                    <li>β⁽ᵗ⁾: Parameters at iteration t</li>
+                    <li>η: Learning rate (step size)</li>
+                    <li>∇C: Gradient of cost function</li>
+                </ul>
+
+                <h3>Dealing with Local Optima</h3>
+                <ul>
+                    <li>Local minimum: Point where cost function is lower than all nearby points</li>
+                    <li>Global minimum: Lowest possible value of cost function</li>
+                    <li>Challenge: Gradient methods can get trapped in local minima</li>
+                </ul>
+            </section>
+
+            <section id="gradient-descent">
+                <h2>5. Gradient Descent Optimization</h2>
+                
+                <h3>Matrix Operations</h3>
+                <ol>
+                    <li>Compute predictions: ŷ = Xβ</li>
+                    <li>Calculate errors: e = ŷ - y</li>
+                    <li>Compute gradient: ∇J(β) = (1/m)Xᵀe</li>
+                    <li>Update parameters: β := β - α∇J(β)</li>
+                </ol>
+
+                <h3>Variants of Gradient Descent</h3>
+                <ul>
+                    <li>Batch Gradient Descent: Uses entire dataset for each update</li>
+                    <li>Stochastic Gradient Descent (SGD): Updates using single data point</li>
+                    <li>Mini-batch Gradient Descent: Updates using small random subsets</li>
+                </ul>
+            </section>
+
+            <section id="advanced-optimizers">
+                <h2>6. Advanced Gradient-Based Optimizers</h2>
+                
+                <h3>Momentum</h3>
+                <div class="formula">
+                    v(t+1) = γv(t) + η∇J(θ)<br>
+                    θ(t+1) = θ(t) - v(t+1)
+                </div>
+
+                <h3>Adam (Adaptive Moment Estimation)</h3>
+                <div class="formula">
+                    m(t) = β₁m(t-1) + (1-β₁)∇J(θ)<br>
+                    v(t) = β₂v(t-1) + (1-β₂)(∇J(θ))²<br>
+                    m̂(t) = m(t)/(1-β₁ᵗ)<br>
+                    v̂(t) = v(t)/(1-β₂ᵗ)<br>
+                    θ(t+1) = θ(t) - η * m̂(t)/√(v̂(t) + ε)
+                </div>
+            </section>
+
+            <section id="regularization">
+                <h2>7. Regularization Techniques</h2>
+                
+                <h3>L2 Regularization (Ridge)</h3>
+                <div class="formula">
+                    Cost function: J(β) = MSE + λ∑ᵢ₌₁ⁿβᵢ²
+                </div>
+                <p>Effect: Shrinks parameters toward zero</p>
+
+                <h3>L1 Regularization (Lasso)</h3>
+                <div class="formula">
+                    Cost function: J(β) = MSE + λ∑ᵢ₌₁ⁿ|βᵢ|
+                </div>
+                <p>Effect: Forces some parameters exactly to zero (feature selection)</p>
+            </section>
+
+            <section id="model-complexity">
+                <h2>8. Model Complexity and Fitting</h2>
+                
+                <h3>Underfitting vs. Overfitting</h3>
+                <ul>
+                    <li>Underfitting: High bias, model too simple to capture patterns</li>
+                    <li>Overfitting: High variance, model captures noise in training data</li>
+                </ul>
+
+                <h3>Bias-Variance Tradeoff</h3>
+                <ul>
+                    <li>Bias: Error from simplified model assumptions</li>
+                    <li>Variance: Error from sensitivity to fluctuations in training data</li>
+                    <li>Goal: Find optimal model complexity that balances bias and variance</li>
+                </ul>
+            </section>
+
+            <section id="hyperparameter">
+                <h2>9. Hyperparameter Tuning Methods</h2>
+                
+                <h3>Random Search</h3>
+                <p>Randomly sample hyperparameters from defined distributions</p>
+
+                <h3>Bayesian Optimization</h3>
+                <p>Build probabilistic model of objective function to efficiently search parameter space</p>
+            </section>
+
+            <section id="feature-selection">
+                <h2>10. Feature Selection Methods</h2>
+                
+                <h3>Filter Methods</h3>
+                <p>Select features independent of learning algorithm (correlation, mutual information)</p>
+
+                <h3>Wrapper Methods</h3>
+                <p>Use model performance to evaluate feature subsets (forward selection, backward elimination)</p>
+
+                <h3>Embedded Methods</h3>
+                <p>Feature selection during model training (L1 regularization, tree importance)</p>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+        // Function to generate QR code (replace with your actual GitHub repository URL)
+        window.onload = function() {
+            // Replace with your actual GitHub repository URL
+            const repoUrl = "https://github.com/yourusername/ml-notes";
+            document.getElementById("repo-url").textContent = repoUrl;
+            
+            // Generate QR code
+            const qr = qrcode(0, 'M');
+            qr.addData(repoUrl);
+            qr.make();
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(5);
+        }
+    </script>
+</body>
+</html> 
