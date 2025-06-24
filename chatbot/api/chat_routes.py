@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from utils import auth_utils
-from services import ai_service
+from services import ai_service, api_manager
 
 # Create blueprint
 blueprint = Blueprint('chat', __name__)
@@ -11,7 +11,8 @@ def chat(current_user):
     data = request.json
     user_input = data.get('message', '')
     context = data.get('context', '')
-    model_type = data.get('model_type', 'groq')
+    provider = data.get('provider', 'groq')
+    model = data.get('model')
     api_key = data.get('api_key')
     conversation_id = data.get('conversation_id')
     document_id = data.get('document_id')
@@ -24,7 +25,8 @@ def chat(current_user):
         str(current_user['_id']),
         user_input,
         context,
-        model_type,
+        provider,
+        model,
         api_key,
         conversation_id,
         document_id
@@ -40,7 +42,7 @@ def legacy_chat_handler():
     data = request.json
     user_input = data.get('message', '')
     context = data.get('context', '')
-    model_type = data.get('model_type', 'groq')
+    provider = data.get('provider', 'groq')
     api_key = data.get('api_key')
     
     if not user_input:
@@ -49,13 +51,17 @@ def legacy_chat_handler():
     # Create prompt
     prompt = ai_service.create_prompt(user_input, context)
     
-    # Get AI response
-    if model_type == 'groq':
+    # Get AI response based on provider
+    if provider == 'groq':
         response, error = ai_service.get_groq_response(prompt, api_key)
-    elif model_type == 'ollama':
+    elif provider == 'openai':
+        response, error = ai_service.get_openai_response(prompt, api_key)
+    elif provider == 'anthropic':
+        response, error = ai_service.get_anthropic_response(prompt, api_key)
+    elif provider == 'ollama':
         response, error = ai_service.get_ollama_response(prompt)
     else:
-        return jsonify({'response': 'Invalid model type specified'})
+        return jsonify({'response': 'Invalid provider specified'})
     
     if error:
         return jsonify({'response': error})

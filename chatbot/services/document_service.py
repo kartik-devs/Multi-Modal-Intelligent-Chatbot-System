@@ -74,7 +74,7 @@ def process_uploaded_file(file, user_id):
     result = db.save_document(user_id, filename, file_path, text)
     
     return {
-        'id': str(result.inserted_id),
+        'id': str(result["inserted_id"]) if isinstance(result, dict) else str(result.inserted_id),
         'filename': filename,
         'preview': text[:200] + '...' if len(text) > 200 else text
     }, None 

@@ -4,8 +4,12 @@ from utils import auth_utils
 # Create blueprint
 blueprint = Blueprint('auth', __name__)
 
-@blueprint.route('/register', methods=['POST'])
+@blueprint.route('/auth/register', methods=['POST', 'OPTIONS'])
 def register():
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     data = request.json
     
     # Validate required fields
@@ -13,7 +17,7 @@ def register():
         return jsonify({'message': 'Missing required fields'}), 400
         
     # Register user
-    user, error = auth_utils.register_user(data['email'], data['password'], data.get('name', ''))
+    user, error = auth_utils.register_user(data['email'], data['password'], data.get('username', ''))
     
     if error:
         return jsonify({'message': error}), 400
@@ -28,8 +32,12 @@ def register():
         }
     }), 201
 
-@blueprint.route('/login', methods=['POST'])
+@blueprint.route('/auth/login', methods=['POST', 'OPTIONS'])
 def login():
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     data = request.json
     
     # Validate required fields
@@ -52,9 +60,13 @@ def login():
         }
     }), 200
 
-@blueprint.route('/user', methods=['GET'])
+@blueprint.route('/auth/user', methods=['GET', 'OPTIONS'])
 @auth_utils.token_required
 def get_user(current_user):
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     return jsonify({
         'id': str(current_user['_id']),
         'email': current_user['email'],

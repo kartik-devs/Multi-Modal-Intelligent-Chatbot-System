@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 # Load environment variables from .env file if it exists
 load_dotenv()
 
+# Database Configuration
+DB_TYPE = "mongodb"  # Options: "mongodb", "sqlite"
+SQLITE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "chatbot.db")
+
 # MongoDB Configuration
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/chatbot")
 
 # API Keys
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = "llama-3.3-70b-versatile"
 LOCAL_MODEL = "llama3"

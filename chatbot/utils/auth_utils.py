@@ -7,11 +7,11 @@ from services import config, db
 
 def hash_password(password):
     """Hash a password for storing"""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(stored_password, provided_password):
     """Verify a stored password against one provided by user"""
-    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password)
+    return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password.encode('utf-8'))
 
 def generate_token(user_id):
     """Generate a JWT token for authentication"""
@@ -65,7 +65,7 @@ def token_required(f):
     
     return decorated
 
-def register_user(email, password, name=""):
+def register_user(email, password, username=""):
     """Register a new user"""
     # Check if user already exists
     if db.get_user_by_email(email):
@@ -73,15 +73,15 @@ def register_user(email, password, name=""):
     
     # Hash password and create user
     password_hash = hash_password(password)
-    result = db.create_user(email, password_hash, name)
+    result = db.create_user(email, password_hash, username)
     
     # Generate token
-    token = generate_token(result.inserted_id)
+    token = generate_token(result["inserted_id"])
     
     return {
-        'id': str(result.inserted_id),
+        'id': result["inserted_id"],
         'email': email,
-        'name': name,
+        'name': username,
         'token': token
     }, None
 

@@ -32,10 +32,12 @@ def get_documents(current_user):
     
     return jsonify({
         'documents': [{
-            'id': str(doc['_id']),
+            '_id': str(doc['_id']),
             'filename': doc['filename'],
             'preview': doc.get('content', ''),
-            'created_at': doc['created_at'].isoformat()
+            'filetype': doc['filename'].split('.')[-1] if '.' in doc['filename'] else 'unknown',
+            'size': len(doc.get('full_content', doc.get('content', ''))),
+            'uploadDate': doc['created_at']
         } for doc in user_documents]
     }), 200
 
@@ -46,10 +48,15 @@ def get_document(current_user, document_id):
     
     if not doc:
         return jsonify({'message': 'Document not found'}), 404
+    
+    # Format the created_at date properly depending on its type
+    created_at = doc['created_at']
+    if hasattr(created_at, 'isoformat'):
+        created_at = created_at.isoformat()
         
     return jsonify({
         'id': str(doc['_id']),
         'filename': doc['filename'],
         'content': doc.get('full_content', doc.get('content', '')),
-        'created_at': doc['created_at'].isoformat()
+        'created_at': created_at
     }), 200 

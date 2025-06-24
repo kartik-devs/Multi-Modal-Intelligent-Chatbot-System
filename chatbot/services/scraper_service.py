@@ -44,6 +44,6 @@ def process_scraped_content(url, user_id, save=False):
     # Save scraped content as a document if requested
     if save and content:
         doc_result = db.save_scraped_content(user_id, url, content)
-        result['document_id'] = str(doc_result.inserted_id)
+        result['document_id'] = str(doc_result["inserted_id"]) if isinstance(doc_result, dict) else str(doc_result.inserted_id)
     
     return result, None 

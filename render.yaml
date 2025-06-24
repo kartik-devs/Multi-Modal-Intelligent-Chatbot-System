@@ -8,4 +8,4 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: GROQ_API_KEY
-        sync: false # This means it will be manually set in the Render dashboard 
+        sync: false
