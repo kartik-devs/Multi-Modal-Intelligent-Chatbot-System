@@ -9,3 +9,9 @@ services:
         value: 3.9.0
       - key: GROQ_API_KEY
         sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DB_TYPE
+        value: mongodb

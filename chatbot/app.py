@@ -2,13 +2,25 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import sys
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Add the parent directory to sys.path to allow imports from other modules
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-# Import modules
-from api import auth_routes, document_routes, conversation_routes, chat_routes, scraper_routes, api_routes
-from services import config
+try:
+    # Import modules
+    from api import auth_routes, document_routes, conversation_routes, chat_routes, scraper_routes, api_routes
+    from services import config
+except Exception as e:
+    logger.error(f"Error importing modules: {str(e)}")
+    raise
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -28,27 +40,46 @@ def after_request(response):
 # Set maximum content length for file uploads
 app.config['MAX_CONTENT_LENGTH'] = config.MAX_CONTENT_LENGTH
 
+# Error handlers
+@app.errorhandler(500)
+def internal_server_error(e):
+    logger.error(f"Internal server error: {str(e)}")
+    return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
+@app.errorhandler(404)
+def not_found_error(e):
+    return jsonify({"error": "Not found", "message": str(e)}), 404
+
+@app.errorhandler(401)
+def unauthorized_error(e):
+    return jsonify({"error": "Unauthorized", "message": str(e)}), 401
+
 # Debug: Print routes being registered
-print("Registering blueprints...")
+logger.info("Registering blueprints...")
 
-# Register API routes
-app.register_blueprint(auth_routes.blueprint, url_prefix='/api')
-app.register_blueprint(document_routes.blueprint, url_prefix='/api')
-app.register_blueprint(conversation_routes.blueprint, url_prefix='/api')
-app.register_blueprint(chat_routes.blueprint, url_prefix='/api')
-app.register_blueprint(scraper_routes.blueprint, url_prefix='/api')
-app.register_blueprint(api_routes.blueprint, url_prefix='/api')
+try:
+    # Register API routes
+    app.register_blueprint(auth_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(document_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(conversation_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(chat_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(scraper_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(api_routes.blueprint, url_prefix='/api')
+    
+    # Debug: Print all registered routes
+    logger.info("Registered routes:")
+    for rule in app.url_map.iter_rules():
+        logger.info(f"{rule.endpoint}: {rule.rule}")
+except Exception as e:
+    logger.error(f"Error registering blueprints: {str(e)}")
+    raise
 
-# Debug: Print all registered routes
-print("Registered routes:")
-for rule in app.url_map.iter_rules():
-    print(f"{rule.endpoint}: {rule.rule}")
-
-# Legacy routes (for backward compatibility)
+# Root route for health check
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return jsonify({"status": "ok", "message": "API server is running"}), 200
 
+# Legacy routes (for backward compatibility)
 @app.route('/chat', methods=['POST'])
 def legacy_chat():
     return chat_routes.legacy_chat_handler()
@@ -59,4 +90,6 @@ def legacy_scrape():
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug, host='0.0.0.0', port=port) 
