@@ -1,35 +1,81 @@
 import datetime
 import uuid
+import os
+import logging
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from services import config
 
-# MongoDB connection
-client = MongoClient(config.MONGO_URI)
-db = client.get_database()
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# MongoDB connection with better error handling
+try:
+    logger.info(f"Connecting to MongoDB with URI: {config.MONGO_URI[:20]}...")
+    client = MongoClient(
+        config.MONGO_URI,
+        serverSelectionTimeoutMS=5000,  # 5 second timeout
+        connectTimeoutMS=5000,
+        socketTimeoutMS=10000,
+        maxPoolSize=50
+    )
+    
+    # Force a connection to verify it works
+    client.admin.command('ismaster')
+    logger.info("MongoDB connection successful!")
+    
+    db = client.get_database()
+    logger.info(f"Connected to database: {db.name}")
+    
+except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+    logger.error(f"MongoDB connection error: {str(e)}")
+    
+    if os.environ.get('RENDER') == 'true':
+        # In production, this is a critical error
+        logger.critical("Failed to connect to MongoDB in production environment")
+        # We'll still define the collections to avoid import errors,
+        # but operations will fail
+    else:
+        # In development, we might want to fall back to SQLite
+        logger.warning("Consider setting DB_TYPE=sqlite in development for offline work")
+    
+    # Define client and db to avoid NameError, but they won't work
+    client = None
+    db = None
 
 # Collections
-users = db.users
-documents = db.documents
-conversations = db.conversations
-messages = db.messages
+users = db.users if db else None
+documents = db.documents if db else None
+conversations = db.conversations if db else None
+messages = db.messages if db else None
 
 # User Functions
 def create_user(email, password_hash, username=""):
     """Create a new user in the database"""
-    user_id = str(uuid.uuid4())
-    created_at = datetime.datetime.utcnow()
-    
-    user_data = {
-        "_id": user_id,
-        "email": email,
-        "password": password_hash,
-        "name": username,
-        "username": username,
-        "created_at": created_at
-    }
-    
-    result = users.insert_one(user_data)
-    return {"inserted_id": user_id}
+    if not db:
+        logger.error("Database connection not available")
+        return {"error": "Database connection failed"}
+        
+    try:
+        user_id = str(uuid.uuid4())
+        created_at = datetime.datetime.utcnow()
+        
+        user_data = {
+            "_id": user_id,
+            "email": email,
+            "password": password_hash,
+            "name": username,
+            "username": username,
+            "created_at": created_at
+        }
+        
+        result = users.insert_one(user_data)
+        logger.info(f"User created with ID: {user_id}")
+        return {"inserted_id": user_id}
+    except Exception as e:
+        logger.error(f"Error creating user: {str(e)}")
+        return {"error": str(e)}
 
 def get_user_by_email(email):
     """Get a user by email"""

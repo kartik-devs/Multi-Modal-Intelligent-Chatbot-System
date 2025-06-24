@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 try:
     # Import modules
-    from api import auth_routes, document_routes, conversation_routes, chat_routes, scraper_routes, api_routes
+    from api import auth_routes, document_routes, conversation_routes, chat_routes, scraper_routes, api_routes, db_status_routes
     from services import config
 except Exception as e:
     logger.error(f"Error importing modules: {str(e)}")
@@ -65,6 +65,7 @@ try:
     app.register_blueprint(chat_routes.blueprint, url_prefix='/api')
     app.register_blueprint(scraper_routes.blueprint, url_prefix='/api')
     app.register_blueprint(api_routes.blueprint, url_prefix='/api')
+    app.register_blueprint(db_status_routes.blueprint, url_prefix='/api')
     
     # Debug: Print all registered routes
     logger.info("Registered routes:")

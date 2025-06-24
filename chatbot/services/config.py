@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Database Configuration
-DB_TYPE = "mongodb"  # Options: "mongodb", "sqlite"
+DB_TYPE = os.environ.get("DB_TYPE", "mongodb")  # Options: "mongodb", "sqlite"
 SQLITE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "chatbot.db")
 
 # MongoDB Configuration
