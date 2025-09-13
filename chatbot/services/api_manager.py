@@ -105,15 +105,6 @@ def save_api_key(user_id, provider, api_key, is_default=False, name=None):
             (user_id, provider)
         )
     
-    # Generate a default name if none provided
-    if not name:
-        provider_name = AI_PROVIDERS.get(provider, {}).get('name', provider.capitalize())
-        count = cursor.execute(
-            "SELECT COUNT(*) FROM api_keys WHERE user_id = ? AND provider = ?",
-            (user_id, provider)
-        ).fetchone()[0]
-        name = f"{provider_name} Key {count + 1}"
-    
     cursor.execute(
         "INSERT INTO api_keys (id, user_id, provider, api_key, name, is_default, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         (key_id, user_id, provider, api_key, name, is_default, created_at)

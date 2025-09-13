@@ -81,7 +81,9 @@ export const chatService = {
 
 // Web scraping services
 export const scrapingService = {
-  scrapeUrl: (url, save = false) => api.post('/api/scrape', { url, save }),
+  scrapeUrl: (url, save = false, formData = null, method = 'GET') => 
+    api.post('/api/scrape', { url, save, form_data: formData, method }),
+  scrapeUcr: (payload) => api.post('/api/scrape/ucr', payload),
 };
 
 export default api; 

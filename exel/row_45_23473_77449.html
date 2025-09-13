@@ -1,0 +1,431 @@
+<!DOCTYPE html><html lang="en"><head>
+ 	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="HandheldFriendly" content="true">
+    <link rel="shortcut icon" href="/DecisionPointUCR/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/DecisionPointUCR/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+ 	<!-- From https://code.jquery.com/jquery-2.1.4.min.js -->
+ 	<script type="text/javascript" src="/DecisionPointUCR/js/jquery-2.1.4.min.js"></script>
+	<link href="/DecisionPointUCR/css/homepage.css" rel="stylesheet">
+ 
+ <script language="javascript">
+ 
+ document.onmousedown=disableclick;
+ status="Right Click Disabled";
+ var values_array=[];
+ var headers=[];
+ var sDateFormatted=" ";
+ var zipCode=" ";
+ 
+ function disableclick(event)
+ {
+  if(event.button==2)
+    {
+      return false;
+    }
+ }    
+ 
+ function showMe(dateservice) {
+
+  var int= dateservice.value.length ;
+  
+  if(int <10){
+  alert("Service Date must be entered in MM/DD/YYYY format including the forward slash /");
+
+  }
+  
+ }
+ 
+  function validate()
+       {
+      
+       var cptVal=document.search.cpt.value.trim();
+       var drgVal=document.search.drg.value.trim();
+       var zipVal=document.search.zip.value.trim();
+       var billVal=document.search.billType.value.trim();
+       var minuteVal= document.search.minutes.value.trim();
+       
+       $("#errMsg").hide();
+       
+       if(cptVal.length<=0 && drgVal.length<=0){
+       		if(billVal.length>=1){
+       			alert("Please enter a 'Procedure Code'");
+       			document.search.cpt.focus() ;
+       		}else{
+       			alert("Please enter either 'Procedure Code' or 'DRG Code' ");
+       		}
+       		return false;
+       }
+       
+       if(zipVal.length<5){
+       		alert("Please provide a five digit Zip Code.");
+       		document.search.zip.focus() ;
+       		return false;
+       }
+       
+       if (document.search.Sdate.value.length<10){
+       	alert("Service Date must be entered in MM/DD/YYYY format including the forward slash /");
+        document.getElementById("spinDiv").style.display="none";
+       	return false;
+ 
+       }else if(cptVal.length>0 && !isAnesthesiaCode(cptVal) &&  minuteVal.length>=1){
+
+
+
+      	 alert(" Not an Anesthesia procedure code.");
+       	 document.getElementById("procCode").focus();
+       	 document.getElementById("spinDiv").style.display="none";	 
+	     return false;
+       
+       }
+       
+       else if(cptVal.length>0 && isAnesthesiaCode(cptVal) &&  minuteVal.length<=0){
+      	 alert(" 'Minutes' field cannot be blank for Anesthesia code.");
+       	 document.getElementById("minu").focus();
+       	 document.getElementById("spinDiv").style.display="none";	 
+	     return false;
+
+       } 
+       
+       
+       else{
+
+
+
+     	  document.getElementById("spinDiv").style.display="block";
+     	  removeTables();
+     	 
+     	  return true;
+       }
+       
+ }
+ 
+
+ function clearFunction() {
+
+   document.getElementById("servicedate").value = "";
+   document.getElementById("procCode").value = "";
+   document.getElementById("modif").value = "";
+   document.getElementById("zip").value = "";
+   $('select').prop('selectedIndex', 0);
+   document.getElementById("minu").value = "";
+   document.getElementById("billtype").value = "";
+   document.getElementById("drg").value = "";
+   document.getElementById("billtypedrg").value = "";
+   $("#itsValue").html("");
+   $("#loader").html("");
+   document.getElementById("billtype").disabled = false;
+   document.getElementById("drg").disabled = false;
+   document.getElementById("procCode").disabled = false;
+   document.getElementById("modif").disabled = false;
+   removeTables();
+   headers=[];
+   values_array=[];
+   sDateFormatted=" ";
+   zipCode=" ";
+   $("#errMsg").hide();
+   
+   
+ }
+ 
+  function removeTables(){
+		 
+		 if(null!=document.getElementById("fulltablediv")){
+		 	document.getElementById("fulltablediv").remove();
+		 }
+	 	 if(null!=document.getElementById("filtertablediv")){
+	 	 document.getElementById("filtertablediv").remove();
+
+	     }
+	 }
+ 
+ </script>
+ 
+
+
+ </head>
+ <body oncontextmenu="return false"> 
+ 
+     
+
+   <title>Context4 Reference-based Pricing UCR Fee Viewer™</title>
+      <h5 text-align="center"></h5>
+      <div style="margin-left:15px;">
+       <h4><b>&nbsp;&nbsp;Please enter Service Date and Zip Code for all UCR searches. All percentiles between 50th and 95th will be returned.
+           <br> &nbsp;&nbsp;Select from dropdown if percentile between 25th and 45th is required.</b><br>
+        </h4>
+       <br><h6><b>&nbsp;&nbsp;For Professional fees, HCPCS fees, or Dental fees, enter the Procedure code and optionally, the Modifier and Percentile, below.
+       <!--Please enter the information below in order to look up a UCR amount. --></b></h6>
+        
+       <div>
+       <form id="search" name="search" method="post" onsubmit="return(validate());" action="createReport">&nbsp;
+       <input id="acctkey" type="hidden" name="accountkey" value="C4H2Qj65Neil_GhodMDQ54Sl9kXsqFs">
+       <input id="billtypedrg" type="hidden" name="billTypeIN">
+       <h7>&nbsp;&nbsp;&nbsp;Service Date&nbsp;<input id="servicedate" size="11" type="text" name="Sdate" placeholder="MM/DD/YYYY" maxlength="10" class="dateOnly" onfocusout="showMe(this)"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Procedure Code&nbsp;<input id="procCode" size="5" type="text" name="cpt" placeholder="Code" maxlength="5" onkeyup="allowCorrectFields('procCode','drg','billtype')"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Modifier&nbsp;<input id="modif" size="5" type="text" name="modifier" placeholder="Modifier" maxlength="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Zip Code&nbsp;<input id="zip" size="5" type="text" name="zip" placeholder="Zip Code" class="zipCodeOnly" maxlength="5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Percentile&nbsp;
+      <select id="percentile" name="percentile">
+        <option value="All" selected="">&nbsp;</option>
+        <option value="25">25</option>
+        <option value="30">30</option>
+        <option value="35">35</option>
+        <option value="40">40</option>
+        <option value="45">45</option>
+       </select></h7>
+        <h6><b><br>&nbsp;&nbsp;For Anesthesia fees, please enter the minutes below and Modifier Code P1-P6 above.</b></h6> &nbsp;
+        <h7>&nbsp;&nbsp;&nbsp;Minutes&nbsp;<input id="minu" size="5" type="text" name="minutes" placeholder="Minutes" class="numbersOnly" maxlength="5"></h7>
+        <h6><b><br>&nbsp;&nbsp;For Outpatient Facility fees billed on a UB-04 form, enter the Type Of Bill (UB Box 4).</b></h6> &nbsp;
+        <h7>&nbsp;&nbsp;&nbsp;Bill Type&nbsp;<input id="billtype" size="5" type="text" name="billType" placeholder="Bill Type" maxlength="3" onkeyup="AllowOneType('billtype','drg')"></h7> 
+        <h6><b><br>&nbsp;&nbsp;For Inpatient Facility fees, please enter DRG (UB Box 71) instead of the Procedure Code, Modifier and  Bill Type.</b></h6> &nbsp;
+        <h7>&nbsp;&nbsp;&nbsp;DRG Code &nbsp; <input id="drg" size="7" type="text" name="drg" placeholder="DRG code" maxlength="3" onkeyup="allowCorrectFields('drg','procCode','billtype')" disabled=""> &nbsp;&nbsp;&nbsp;</h7>
+            <br><br>
+               <div style="text-align:center"><button class="btn" id="submitBtn" style="color:white; background-color:#7bbb5e;" type="submit"> Submit </button> <!-- class="btn btn-primary" #049c76;--> 
+                &nbsp;&nbsp;&nbsp;<button id="downloader" type="button" class="btn" style="color:white; background-color:#7bbb5e;" onclick="DownloadReport()"> Download </button>
+                &nbsp;&nbsp;&nbsp;<button id="clear" type="reset" class="btn" style="color:white; background-color:#EE4B2B" onclick="clearFunction()"> Clear </button>&nbsp;&nbsp;&nbsp;
+               
+        <button onclick="window.open('\\DecisionPointUCR\\help\\Context4_ReferenceBasedPricing_UCRFeeViewer.pdf', '_blank');" class="btn" type="button" style="color:white;background-color:#008CBA;"> Help </button></div>
+       
+       </form>
+       </div>
+       
+       <div text-align="center" id="loader">
+ 
+       </div>
+    
+    <div id="itsValue">
+    </div>
+    
+    
+
+    <div id="spinDiv" style="display:none">
+    	<div> <p style="font-size:22px;">Loading your estimated charge..&nbsp;&nbsp; </p></div>
+    	<div><div id="spinner" class="spinmiddle"> </div></div>
+  	</div>
+       
+  	
+       
+             
+       <div id="fulltablediv">
+            <br><br>
+           <table class="table table-sm table-bordered table-hover table-striped" style="width:750px;margin:10px 225px 5px 230px;  ">
+               <thead style="text-align:center;width:100%;background-color:rgb(108, 153, 197);  color: #ffffff;"> 
+                        <tr><th scope="col" width="50%"><u>Code:</u> 23473&nbsp;&nbsp;&nbsp;</th>
+                        <th scope="col" width="50%"><u>Desc:</u> REVIS RECONST SHOULDER JOINT</th>   
+                    
+                </tr></thead>
+                <tbody>
+                    <tr class="percentileheader">
+                        <th scope="row" style="text-align:center; background-color:rgb(166, 182, 206); color:#ffffff;" colspan="2"><u>Percentiles</u></th>
+                    </tr>
+                    <tr class="percentiles1 prctclass">
+                            <td><b>50<sup>th</sup> :</b> $ 5500.38 </td> <td><b>75<sup>th</sup> :</b> $ 8988.30</td>
+                    </tr>
+                    <tr class="percentiles2 prctclass">
+                        <td><b>55<sup>th</sup> :</b> $ 5898.74  </td> <td><b>80<sup>th</sup> :</b> $ 10140.93</td>
+                    </tr>
+                    <tr class="percentiles3 prctclass">
+                        <td><b>60<sup>th</sup> :</b> $ 6325.72</td> <td><b>85<sup>th</sup> :</b> $ 13864.89</td>
+                    </tr>
+                    <tr class="percentiles4 prctclass">
+                        <td><b>65<sup>th</sup> :</b> $ 6895.19</td> <td><b>90<sup>th</sup> :</b> $ 21010.70 </td>
+                    </tr>
+                    <tr class="percentiles5 prctclass">
+                        <td><b>70<sup>th</sup> :</b> $ 7614.32</td> <td><b>95<sup>th</sup> :</b> $ 34125.92</td>
+                    </tr>
+                </tbody>
+            </table>   
+            
+            <div class="container">
+				<p style="color:red;margin-left: 200px;margin-right:200px;"></p><p>   
+			</p></div> 
+       </div>
+
+
+
+
+
+ <script>
+	 
+  $(document).ready(function(){
+ 
+ 	 var sDate=document.getElementById("servicedate");
+ 	 sDate.value='09/12/2025';
+ 	 
+ 	 document.getElementById("procCode").value='23473';
+ 	 document.getElementById("modif").value='';
+ 	 document.getElementById("zip").value='77449';
+ 	 
+ 	 zipCode='77449';
+ 	 var d=[];
+ 	 if(null!=sDate.value && sDate.value.trim().length>0){
+ 	 	d=sDate.value.split("/");
+ 	 	sDateFormatted=d[2]+"_"+d[0]+"_"+d[1];
+ 	 	
+ 	 }
+ 	 
+ 	 
+ 	 var prctValue=document.getElementById("percentile");
+ 	 prctValue.value='All';
+ 	 if(prctValue.value==null || prctValue.value.trim().length<=0) { prctValue.value="All"; }
+ 	 
+ 	 document.getElementById("minu").value='';
+ 	 document.getElementById("billtype").value='';
+ 	 document.getElementById("drg").value='';
+ 	 
+
+	 var fblength=  $("#billtype").val().trim().length;
+	 var sblength=  $("#drg").val().trim().length;
+	 var cptlength= $("#procCode").val().trim().length;
+
+	 if (fblength>=1 || cptlength>=1){
+	 document.getElementById("drg").disabled = true;
+	 }else if(sblength>=1){
+	 document.getElementById("billtype").disabled = true;
+	 document.getElementById("procCode").disabled = true;
+	 document.getElementById("modif").disabled = true;
+	 }
+	 
+	 var tableId='1';
+	 //var inputCode=""+"23473"+"   ";
+	 var inputCode=""+"23473";
+	 
+	 if(tableId==='1'){
+	 	headers=["\"Code\"","\"Modifier\"","\"Description\"","\"50th Percentile\"","\"55th Percentile\"","\"60th Percentile\"","\"65th Percentile\"","\"70th Percentile\"","\"75th Percentile\"","\"80th Percentile\"","\"85th Percentile\"","\"90th Percentile\"","\"95th Percentile\""];
+	 	values_array=["\""+inputCode+"\"","\"\"","\"REVIS RECONST SHOULDER JOINT\"","\"5500.38\"","\"5898.74\"","\"6325.72\"","\"6895.19\"","\"7614.32\"","\"8988.30\"","\"10140.93\"","\"13864.89\"","\"21010.70\"","\"34125.92\""];
+	 	
+	 } if(tableId==='2'){
+	 	headers=["\"Code\"","\"Modifier\"","\"Description\"","\"Allth Percentile\""];
+	 	values_array=["\""+inputCode+"\"","\"\"","\"REVIS RECONST SHOULDER JOINT\"","\"\""];
+
+	 }
+		 
+  	 });
+  
+	 jQuery('.numbersOnly').keyup(function () { 
+	   this.value = this.value.replace(/[^0-9\.]/g,'');  	
+	 });
+	  
+	 jQuery('.zipCodeOnly').keyup(function () { 
+	   this.value = this.value.replace(/[^0-9]/g,'');  	
+	 });
+	  
+	 jQuery('.dateOnly').keyup(function () { 
+	   this.value = this.value.replace(/[^0-9\/]/g,'');  	
+	 });
+     
+</script>
+
+<script>     
+
+     function AllowOneType(currentbox, boxTodisable){
+
+		var cblength=  $("#"+currentbox).val().trim().length;
+
+		if (cblength>=1){
+			document.getElementById(boxTodisable).value= '';
+			document.getElementById(boxTodisable).disabled = true;
+		}else{
+		document.getElementById(boxTodisable).disabled = false;
+		}
+	 }
+	 
+	 function allowCorrectFields(currentbox, boxTodisable,billTypeBox){
+
+		var cblength=  $("#"+currentbox).val().trim().length;
+		var billTypeLength= $("#"+billTypeBox).val().trim().length;
+		var minuField=document.getElementById("minu");
+		
+		if(currentbox ==='drg' && cblength>=1 ){
+			document.getElementById(boxTodisable).value= '';
+			document.getElementById(boxTodisable).disabled = true;
+			document.getElementById(billTypeBox).value= '';
+			document.getElementById(billTypeBox).disabled = true;
+			document.getElementById("modif").value= '';
+			document.getElementById("modif").disabled = true;
+			
+		}else if (currentbox ==='procCode' && cblength>=1){		
+			document.getElementById(boxTodisable).value= '';
+			document.getElementById(boxTodisable).disabled = true;
+			document.getElementById(billTypeBox).disabled = false;
+		}else if(billTypeLength>=1){
+			document.getElementById("drg").value= '';
+			document.getElementById("drg").disabled = true;
+		}else {
+			document.getElementById("drg").disabled = false;
+			document.getElementById(billTypeBox).disabled = false;
+			document.getElementById("procCode").disabled = false;
+			document.getElementById("modif").disabled = false;
+			
+		}
+	 } 
+	 
+	 function DownloadReport(){
+	 
+	 	var cptVal=document.search.cpt.value.trim();
+	 	var tMulti=!!document.getElementById("fulltablediv");
+	 	var tSingle=!!document.getElementById("filtertablediv");
+	 	
+	 	var csv_data = [];
+	 	var theDate=new Date();
+	 	var theYear=theDate.getFullYear()-1;
+
+	 	csv_data.push(headers.join(","));
+	 	csv_data.push(values_array.join(","));
+	 	
+	 	if(cptVal.length >=1 && (tMulti| tSingle)){
+	 		csv_data.push("");
+	 		csv_data.push("*CPT copyright "+theYear+" American Medical Association. All rights reserved. CPT is a registered trademark of the American Medical Association.");
+	 	}
+	 	csv_data = csv_data.join('\n');
+	 	
+	 	downloadCSVFile(csv_data);
+
+	 	return false;
+	 
+	 }
+	 
+     function downloadCSVFile(csv_data) {
+
+         // CSV file object with data
+         CSVFile = new Blob([csv_data], {
+             type: "text/csv"
+         });
+
+         var t_link = document.createElement('a');
+
+         // Set download file name
+         if(zipCode.trim().length<=0 && sDateFormatted.trim().length<=0  ) { t_link.download = "C4H_FeeViewer.csv";}
+         else { t_link.download = "C4H_FeeViewer_"+zipCode+"_"+sDateFormatted+".csv"; }
+
+         var url = window.URL.createObjectURL(CSVFile);
+         t_link.href = url;
+
+         t_link.style.display = "none";
+         document.body.appendChild(t_link);
+         t_link.click();
+         document.body.removeChild(t_link);
+         
+     }
+     
+     function isAnesthesiaCode(code){
+     	var pattern=new RegExp("^00[1-9][0-9][0-9]$|^01[0-9][0-9][0-9]$");
+     	return pattern.test(code);
+
+     }
+	 
+	 
+	 
+	
+
+ </script>
+ 
+ 
+ </div></body></html>

@@ -88,7 +88,10 @@ def get_openai_response(prompt, api_key, model=None):
     data = {
         "model": model,
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "user",
+                "content": prompt
+            }
         ]
     }
     try:
@@ -149,12 +152,13 @@ def get_ollama_response(prompt, model=None):
 def create_prompt(user_input, context):
     """Create a prompt for the AI model"""
     return f"""Question: {user_input}
-    
 Based on the following context:
 
 {context[:4000]}  # Limiting content length to avoid token limits
 
-Please provide a concise and accurate answer based solely on the provided context."""
+Use internet and provide accurate and proper responce using the documents provided
+
+Always show the output as a list of steps to undertake."""
 
 def process_chat(user_id, user_input, context, provider='groq', model=None, api_key=None, conversation_id=None, document_id=None):
     """Process a chat message and get AI response using the specified provider"""
