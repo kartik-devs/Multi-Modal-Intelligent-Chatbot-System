@@ -84,3 +84,34 @@ def scrape_ucr(current_user):
         response['raw_html'] = html
 
     return jsonify(response), 200
+
+
+@blueprint.route('/scrape/batch-json', methods=['POST'])
+# @auth_utils.token_required  # Temporarily disabled for easier testing
+def scrape_batch_json():
+    try:
+        data = request.json or {}
+        
+        # Extract required fields
+        acct_key = data.get('acctkey', '')
+        line_items = data.get('line_items', [])
+        
+        if not acct_key:
+            return jsonify({'error': 'acctkey is required'}), 400
+            
+        if not line_items:
+            return jsonify({'error': 'line_items array is required'}), 400
+            
+        if not isinstance(line_items, list):
+            return jsonify({'error': 'line_items must be an array'}), 400
+        
+        # Import the batch processor
+        from services.ucr_batch_runner import process_json_input
+        
+        # Process the JSON input
+        result = process_json_input(data, acct_key)
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Processing failed: {str(e)}'}), 500

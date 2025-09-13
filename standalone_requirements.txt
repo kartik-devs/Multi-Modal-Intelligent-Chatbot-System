@@ -1,0 +1,5 @@
+# Standalone UCR Scraper Requirements
+requests==2.31.0
+beautifulsoup4==4.12.3
+playwright==1.46.0
+openpyxl==3.1.2
